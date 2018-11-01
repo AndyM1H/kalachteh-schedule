@@ -1,0 +1,19 @@
+{
+  "name": "kalachteh-schedule",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AndyM1H/kalachteh-schedule.git"
+  },
+  "author": "AndyM1H",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AndyM1H/kalachteh-schedule/issues"
+  },
+  "homepage": "https://github.com/AndyM1H/kalachteh-schedule#readme"
+}
