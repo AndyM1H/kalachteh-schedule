@@ -1,9 +1,9 @@
-var needle = require("needle");
-var cheerio = require("cheerio");
-var async = require("async");
-var schedule = require('node-schedule');
-let nodemailer = require("nodemailer");
-var each = require('async-each');
+const needle = require("needle");
+const cheerio = require("cheerio");
+const async = require("async");
+const schedule = require('node-schedule');
+const nodemailer = require("nodemailer");
+const each = require('async-each');
 
 
 const MAILS = ['andy.mih17@gmail.com']
@@ -21,7 +21,8 @@ var correctDate = (i)  => {
 }
   
 const url = 'http://kalachteh.ru/schedule/kioskschedule.html'
-const i = schedule.scheduleJob('0 0 11 * * *', () => {
+const i = schedule.scheduleJob('0 0 11 * * 1-6', 
+() => {
 
   const j = schedule.scheduleJob('* */15 11-13 * * *', () => {
     needle.get(url, (err,res) => {
