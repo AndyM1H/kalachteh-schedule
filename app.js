@@ -21,10 +21,9 @@ var correctDate = (i)  => {
 }
   
 const url = 'http://kalachteh.ru/schedule/kioskschedule.html'
-const i = schedule.scheduleJob('0 0 11 * * 1-6', 
-() => {
+const i = schedule.scheduleJob('0 0 12 * * 1-6', () => {
 
-  const j = schedule.scheduleJob('* */15 11-13 * * *', () => {
+  const j = schedule.scheduleJob('* */15 12-13 * * *', () => {
     needle.get(url, (err,res) => {
     if(err) throw(err);
    
@@ -44,6 +43,7 @@ const i = schedule.scheduleJob('0 0 11 * * 1-6',
       let startInd = schedule.indexOf('Т33');
       let endInd = schedule.indexOf('Т43');
       schedule = schedule.slice(startInd, endInd)
+      if (schedule != '')
       async.each(MAILS, (mail, cb) => {
         let mailOptions = {
           from: "kalachtehschedule@gmail.com",
