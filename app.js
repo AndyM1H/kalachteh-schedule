@@ -21,10 +21,11 @@ var correctDate = (i)  => {
 }
   
 const url = 'http://kalachteh.ru/schedule/kioskschedule.html'
-const i = schedule.scheduleJob('0 0 12 * * 1-6', () => {
+//const i = schedule.scheduleJob('0 0 12 * * 1-6', () => {
 
-  const j = schedule.scheduleJob('* */15 12-13 * * *', () => {
-    needle.get(url, (err,res) => {
+//  const j = schedule.scheduleJob('* */15 12-13 * * *', () => {
+  const j = schedule.scheduleJob('*/5 * * * * *', () => {
+  needle.get(url, (err,res) => {
     if(err) throw(err);
    
     let $ = cheerio.load(res.body);
@@ -40,9 +41,9 @@ const i = schedule.scheduleJob('0 0 12 * * 1-6', () => {
       // Оставляем в расписании только расписание на завтра
       schedule = schedule.slice(0,endSchedule);
       // Поиск нужной группы
-      let startInd = schedule.indexOf('Т33');
-      let endInd = schedule.indexOf('Т43');
-      schedule = schedule.slice(startInd, endInd)
+      let startInd = schedule.indexOf('Т43');
+      let endInd = schedule.indexOf('');
+      schedule = endInd ? schedule.slice(startInd, endInd) : schedule.slice(startInd);
       if (schedule != '')
       async.each(MAILS, (mail, cb) => {
         let mailOptions = {
@@ -69,5 +70,5 @@ const i = schedule.scheduleJob('0 0 12 * * 1-6', () => {
 });
 });
 
-})
+//})
 
