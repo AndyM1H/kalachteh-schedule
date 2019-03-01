@@ -1,0 +1,34 @@
+{
+  "groups": {
+    "Б12": {
+      "emails": ["mikayla.koch@ethereal.email"]
+    },
+    "Б22": {
+      "emails": ["angelina36@ethereal.email"]
+    },
+    "Б32": {
+      "emails": ["zoie79@ethereal.email"]
+    },
+    "Бух11": {
+      "emails": ["layla.kihn@ethereal.email"]
+    },
+    "Бух21": {
+      "emails": ["jany.kihn@ethereal.email"]
+    },
+    "Бух31": {
+      "emails": ["steve.casper@ethereal.email"]
+    },
+    "Т13": {
+      "emails": ["faye.gottlieb4@ethereal.email"]
+    },
+    "Т23": {
+      "emails": ["kayla97@ethereal.email"]
+    },
+    "Т33": {
+      "emails": ["magnolia68@ethereal.email"]
+    },
+    "Т43": {
+      "emails": ["bianka82@ethereal.email", "houston.ritchie60@ethereal.email"]
+    }
+  }
+}
