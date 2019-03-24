@@ -4,7 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
   },
   "repository": {
     "type": "git",
@@ -17,19 +18,12 @@
   },
   "homepage": "https://github.com/AndyM1H/kalachteh-schedule#readme",
   "dependencies": {
-    "async": "^2.6.1",
-    "async-each": "^1.0.1",
     "body-parser": "^1.18.3",
+    "botact": "^2.4.2",
     "cheerio": "^1.0.0-rc.2",
     "cheerio-tableparser": "^1.0.1",
     "debug": "^4.1.0",
-    "dotenv": "^6.2.0",
-    "easyvk": "^2.2.16",
     "express": "^4.16.4",
-    "needle": "^2.2.4",
-    "node-schedule": "^1.3.0",
-    "node-vk-bot": "^1.2.3",
-    "node-vk-bot-api": "^2.4.8",
-    "nodemailer": "^4.6.8"
+    "needle": "^2.2.4"
   }
 }

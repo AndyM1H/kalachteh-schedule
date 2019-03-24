@@ -1,108 +1,213 @@
-const needle = require('needle');
-const cheerio = require('cheerio'),
-  cheerioTableparser = require('cheerio-tableparser');
-const async = require('async');
-const schedule = require('node-schedule');
-const nodemailer = require('nodemailer');
-const each = require('async-each');
-var fs = require('fs');
+// require('dotenv').load();
+const TOKEN = process.env.VK_API_KEY;
+const express = require('express');
+const bodyParser = require('body-parser');
+const {Botact} = require('botact');
+const schedule = require('./schedule');
 
-// get JSON data (emails of groups...)
-let json_data = fs.readFileSync('emails.json', 'utf8');
-json_data = JSON.parse(json_data);
-// json_data['groups']['Б12']['emails']);
+const bot = new Botact({
+  confirmation: '6f115fc4',
+  token: TOKEN
+});
 
-var correctDate = i => {
-  return i < 10 ? '0' + i : i;
-};
+const port = process.env.PORT || 8000;
+const app = express();
 
-const url = 'http://kalachteh.ru/schedule/kioskschedule.html';
-const i = schedule.scheduleJob('0 0 12 * * 1-6', () => {
-  const j = schedule.scheduleJob('* */15 12-13 * * *', () => {
-    needle.get(url, (err, res) => {
-      if (err) throw err;
+app.use(bodyParser.json());
 
-      let transporter = nodemailer.createTransport({
-        pool: true,
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: 'travon.medhurst24@ethereal.email', // generated ethereal user
-          pass: 'f4GpmPAES6mNTHZJ2j' // generated ethereal password
-        }
-      });
+app.listen(port, () => {
+  console.log(`Express server is listening on ${port}`);
+});
 
-      let $ = cheerio.load(res.body);
-      cheerioTableparser($);
-      var data = $('table').parsetable(true, true, true);
-      let date = data[0][0];
-      let cutIndex = date.indexOf('Группа');
-      scheduleDate = `Расписание на ${date.slice(0, cutIndex)}`;
-      date = date.slice(14, 16);
-      let dateNow = new Date();
-      let scheduleCurrent = `Расписание на ${correctDate(
-        dateNow.getDate()
-      )}.${correctDate(dateNow.getMonth() + 1)}.${dateNow.getFullYear()}`;
-
-      // Если расписание на сегодня готово в полном объеме (т.е на все группы)
-      if (data[0][11].includes(scheduleCurrent)) {
-        let pairs = {},
-          group = {};
-        for (let i = 1; i < 10 + 1; i++) {
-          group = data[0][i];
-          let htmlTable = `
-          <table>
-            <tr>
-              <thead>
-                <td>1-ая пара<td>
-                <td>2-ая пара<td>
-                <td>3-ая пара<td>
-                <td>4-ая пара<td>
-                <td>5-ая пара<td>
-                <td>6-ая пара<td>
-              </thead>
-            </tr>
-            <tr>
-              <td>${data[1][i]}<td>
-              <td>${data[2][i]}<td>
-              <td>${data[3][i]}<td>
-              <td>${data[4][i]}<td>
-              <td>${data[5][i]}<td>
-              <td>${data[6][i]}<td>
-            </tr>
-          </table>
-        `;
-
-          async.each(
-            json_data['groups'][group]['emails'],
-            (mail, cb) => {
-              let mailOptions = {
-                from: 'kalachtehschedule@gmail.com',
-                to: mail,
-                subject: `${scheduleDate} [kalachteh.ru]`,
-                text: `Привет! Держи ${scheduleDate}!\n`,
-                html: `<b>${htmlTable}</b>` // html body
-              };
-
-              transporter.sendMail(mailOptions, (error, info) => {
-                if (error) {
-                  return console.log(error);
-                } else {
-                  console.log(`Email successfully sent! ${mail}`);
-                  cb(null, info);
-                }
-              });
+bot.addScene(
+  'wizard',
+  ({reply, scene: {next}}) => {
+    next();
+    reply('Привет, нажми начать!', null, {
+      one_time: false,
+      buttons: [
+        [
+          {
+            action: {
+              type: 'text',
+              payload: {
+                button: 'start'
+              },
+              label: 'Начать'
             },
-            (error, info) => {
-              if (error) return console.log(error);
-              console.log('done');
-              // transporter.close();
-              j.cancel();
-            }
-          );
-        }
-      }
+            color: 'primary'
+          }
+        ]
+      ]
     });
+  },
+  ({reply, body, scene: {leave}}) => {
+    leave();
+  }
+);
+
+bot.command('join', ({scene: {join}}) => join('wizard'));
+
+bot.command('end', ctx => {
+  ctx.reply('end', null, {
+    one_time: true,
+    buttons: [
+      [
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Начать'
+            },
+            label: 'Начать'
+          },
+          color: 'secondary'
+        }
+      ]
+    ]
   });
 });
+
+bot.command('Начать', ctx => {
+  ctx.reply('Выбери группу, чтобы получить расписание', null, {
+    one_time: false,
+    buttons: [
+      [
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Б12'
+            },
+            label: 'Б12'
+          },
+          color: 'secondary'
+        },
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Б22'
+            },
+            label: 'Б22'
+          },
+          color: 'secondary'
+        },
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Б32'
+            },
+            label: 'Б32'
+          },
+          color: 'secondary'
+        }
+      ],
+      [
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Бух11'
+            },
+            label: 'Бух11'
+          },
+          color: 'primary'
+        },
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Бух21'
+            },
+            label: 'Бух21'
+          },
+          color: 'primary'
+        },
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Бух31'
+            },
+            label: 'Бух31'
+          },
+          color: 'primary'
+        }
+      ],
+      [
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Т13'
+            },
+            label: 'Т13'
+          },
+          color: 'positive'
+        },
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Т23'
+            },
+            label: 'Т23'
+          },
+          color: 'positive'
+        },
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Т33'
+            },
+            label: 'Т33'
+          },
+          color: 'positive'
+        },
+        {
+          action: {
+            type: 'text',
+            payload: {
+              button: 'Т43'
+            },
+            label: 'Т43'
+          },
+          color: 'positive'
+        }
+      ]
+    ]
+  });
+});
+
+bot.on(async ctx => {
+  if (isGroup(ctx.text)) {
+    let data = await schedule.getSchedule(ctx.text);
+    ctx.reply(data.join(''));
+  } else {
+    ctx.reply('Я не понимаю. Я могу отправлять только расписание!');
+  }
+});
+
+function isGroup(group) {
+  let groups = [
+    'Б12',
+    'Б22',
+    'Б32',
+    'Бух11',
+    'Бух21',
+    'Бух31',
+    'Т13',
+    'Т23',
+    'Т33',
+    'Т43'
+  ];
+  let found = groups.includes(group);
+  if (found) return true;
+  else return false;
+}
+
+// Bot's endpoint
+app.post('/', bot.listen);
