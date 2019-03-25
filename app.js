@@ -1,12 +1,12 @@
-// require('dotenv').load();
+// require("dotenv").config();
 const TOKEN = process.env.VK_API_KEY;
-const express = require('express');
-const bodyParser = require('body-parser');
-const {Botact} = require('botact');
-const schedule = require('./schedule');
+const express = require("express");
+const bodyParser = require("body-parser");
+const { Botact } = require("botact");
+const schedule = require("./schedule");
 
 const bot = new Botact({
-  confirmation: '6f115fc4',
+  confirmation: "6f115fc4",
   token: TOKEN
 });
 
@@ -20,162 +20,162 @@ app.listen(port, () => {
 });
 
 bot.addScene(
-  'wizard',
-  ({reply, scene: {next}}) => {
+  "wizard",
+  ({ reply, scene: { next } }) => {
     next();
-    reply('Привет, нажми начать!', null, {
+    reply("Привет, нажми начать!", null, {
       one_time: false,
       buttons: [
         [
           {
             action: {
-              type: 'text',
+              type: "text",
               payload: {
-                button: 'start'
+                button: "start"
               },
-              label: 'Начать'
+              label: "Начать"
             },
-            color: 'primary'
+            color: "primary"
           }
         ]
       ]
     });
   },
-  ({reply, body, scene: {leave}}) => {
+  ({ reply, body, scene: { leave } }) => {
     leave();
   }
 );
 
-bot.command('join', ({scene: {join}}) => join('wizard'));
+bot.command("join", ({ scene: { join } }) => join("wizard"));
 
-bot.command('end', ctx => {
-  ctx.reply('end', null, {
+bot.command("end", ctx => {
+  ctx.reply("end", null, {
     one_time: true,
     buttons: [
       [
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Начать'
+              button: "Начать"
             },
-            label: 'Начать'
+            label: "Начать"
           },
-          color: 'secondary'
+          color: "secondary"
         }
       ]
     ]
   });
 });
 
-bot.command('Начать', ctx => {
-  ctx.reply('Выбери группу, чтобы получить расписание', null, {
+bot.command("Начать", ctx => {
+  ctx.reply("Выбери группу, чтобы получить расписание", null, {
     one_time: false,
     buttons: [
       [
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Б12'
+              button: "Б12"
             },
-            label: 'Б12'
+            label: "Б12"
           },
-          color: 'secondary'
+          color: "secondary"
         },
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Б22'
+              button: "Б22"
             },
-            label: 'Б22'
+            label: "Б22"
           },
-          color: 'secondary'
+          color: "secondary"
         },
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Б32'
+              button: "Б32"
             },
-            label: 'Б32'
+            label: "Б32"
           },
-          color: 'secondary'
+          color: "secondary"
         }
       ],
       [
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Бух11'
+              button: "Бух11"
             },
-            label: 'Бух11'
+            label: "Бух11"
           },
-          color: 'primary'
+          color: "primary"
         },
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Бух21'
+              button: "Бух21"
             },
-            label: 'Бух21'
+            label: "Бух21"
           },
-          color: 'primary'
+          color: "primary"
         },
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Бух31'
+              button: "Бух31"
             },
-            label: 'Бух31'
+            label: "Бух31"
           },
-          color: 'primary'
+          color: "primary"
         }
       ],
       [
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Т13'
+              button: "Т13"
             },
-            label: 'Т13'
+            label: "Т13"
           },
-          color: 'positive'
+          color: "positive"
         },
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Т23'
+              button: "Т23"
             },
-            label: 'Т23'
+            label: "Т23"
           },
-          color: 'positive'
+          color: "positive"
         },
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Т33'
+              button: "Т33"
             },
-            label: 'Т33'
+            label: "Т33"
           },
-          color: 'positive'
+          color: "positive"
         },
         {
           action: {
-            type: 'text',
+            type: "text",
             payload: {
-              button: 'Т43'
+              button: "Т43"
             },
-            label: 'Т43'
+            label: "Т43"
           },
-          color: 'positive'
+          color: "positive"
         }
       ]
     ]
@@ -183,31 +183,9 @@ bot.command('Начать', ctx => {
 });
 
 bot.on(async ctx => {
-  if (isGroup(ctx.text)) {
-    let data = await schedule.getSchedule(ctx.text);
-    ctx.reply(data.join(''));
-  } else {
-    ctx.reply('Я не понимаю. Я могу отправлять только расписание!');
-  }
+  let data = await schedule.getSchedule(ctx.text);
+  ctx.reply(data ? data.join("") : "На эту группу пока нет расписания :-(");
 });
 
-function isGroup(group) {
-  let groups = [
-    'Б12',
-    'Б22',
-    'Б32',
-    'Бух11',
-    'Бух21',
-    'Бух31',
-    'Т13',
-    'Т23',
-    'Т33',
-    'Т43'
-  ];
-  let found = groups.includes(group);
-  if (found) return true;
-  else return false;
-}
-
 // Bot's endpoint
-app.post('/', bot.listen);
+app.post("/", bot.listen);

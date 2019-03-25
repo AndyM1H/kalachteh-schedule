@@ -1,26 +1,49 @@
-const needle = require('needle');
-const cheerio = require('cheerio'),
-  cheerioTableparser = require('cheerio-tableparser');
+const needle = require("needle");
+const cheerio = require("cheerio"),
+  cheerioTableparser = require("cheerio-tableparser");
 
 exports.getSchedule = async function(req_group) {
   var correctDate = i => {
-    return i < 10 ? '0' + i : i;
+    return i < 10 ? "0" + i : i;
   };
 
-  const url = 'http://kalachteh.ru/schedule/kioskschedule.html';
+  function isGroup(group) {
+    function convert(group) {
+      return group.replace(/-/g, "").toUpperCase();
+    }
+    let groups = [
+      "Б12",
+      "Б22",
+      "Б32",
+      "Бух11",
+      "Бух21",
+      "Бух31",
+      "Т13",
+      "Т23",
+      "Т33",
+      "Т43"
+    ];
+    req_group = convert(req_group);
+    let found = groups.includes(req_group);
+    if (found) return true;
+    else return false;
+  }
+  if (!isGroup(req_group)) return null;
 
-  let res_needle = await needle('get', url);
+  const url = "http://kalachteh.ru/schedule/kioskschedule.html";
+
+  let res_needle = await needle("get", url);
   let $ = cheerio.load(res_needle.body);
   cheerioTableparser($);
-  let data = $('table').parsetable(true, true, true);
+  let data = $("table").parsetable(true, true, true);
 
   let dateOfSchedule = data[0][0].replace(
-    new RegExp('Группа|[/\\\\/]|пара', 'g'),
-    ''
+    new RegExp("Группа|[/\\\\/]|пара", "g"),
+    ""
   );
 
   let group = {};
-  let schedule = '';
+  let schedule = "";
   for (let i = 1; i < 10 + 1; i++) {
     group = data[0][i];
     if (group == req_group) {
@@ -28,46 +51,58 @@ exports.getSchedule = async function(req_group) {
         dateOfSchedule,
         `\nГруппа: ${group}`,
         `\n1 пара: ${
-          data[1][i] != '//'
-            ? data[1][i].replace(new RegExp('([:)\n//])', 'g'), '  ')
-            : '-'
-        } `.replace(/\d{3}/g, ' $& '),
+          data[1][i] != "//"
+            ? data[1][i].replace(new RegExp("([:)\n//])", "g"), "  ")
+            : "-"
+        } `
+          .replace(/\d{3}/g, " $& ")
+          .replace(/культ/g, "$& "),
         `\n2 пара: ${
-          data[2][i] != '//'
-            ? data[2][i].replace(new RegExp('[:)\n//]', 'g'), '  ')
-            : '-'
-        }`.replace(/\d{3}/g, ' $& '),
+          data[2][i] != "//"
+            ? data[2][i].replace(new RegExp("[:)\n//]", "g"), "  ")
+            : "-"
+        }`
+          .replace(/\d{3}/g, " $& ")
+          .replace(/культ/g, "$& "),
         `\n3 пара: ${
-          data[3][i] != '//'
-            ? data[3][i].replace(new RegExp('[:)\n//]', 'g'), '  ')
-            : '-'
-        }`.replace(/\d{3}/g, ' $& '),
+          data[3][i] != "//"
+            ? data[3][i].replace(new RegExp("[:)\n//]", "g"), "  ")
+            : "-"
+        }`
+          .replace(/\d{3}/g, " $& ")
+          .replace(/культ/g, "$& "),
         `\n4 пара: ${
-          data[4][i] != '//'
-            ? data[4][i].replace(new RegExp('[:)\n//]', 'g'), '  ')
-            : '-'
-        }`.replace(/\d{3}/g, ' $& '),
+          data[4][i] != "//"
+            ? data[4][i].replace(new RegExp("[:)\n//]", "g"), "  ")
+            : "-"
+        }`
+          .replace(/\d{3}/g, " $& ")
+          .replace(/культ/g, "$& "),
         `\n5 пара: ${
-          data[5][i] != '//'
-            ? data[5][i].replace(new RegExp('[:)\n//]', 'g'), '  ')
-            : '-'
-        }`.replace(/\d{3}/g, ' $& '),
+          data[5][i] != "//"
+            ? data[5][i].replace(new RegExp("[:)\n//]", "g"), "  ")
+            : "-"
+        }`
+          .replace(/\d{3}/g, " $& ")
+          .replace(/культ/g, "$& "),
         `\n6 пара: ${
-          data[6][i] != '//'
-            ? data[6][i].replace(new RegExp('[:)\n//]', 'g'), '  ')
-            : '-'
-        }\n`.replace(/\d{3}/g, ' $& ')
+          data[6][i] != "//"
+            ? data[6][i].replace(new RegExp("[:)\n//]", "g"), "  ")
+            : "-"
+        }\n`
+          .replace(/\d{3}/g, " $& ")
+          .replace(/культ/g, "$& ")
       ];
     }
   }
-  if (schedule == '') schedule = 'На эту группу пока нет расписания :-(';
+
   for (let i = 0; i < schedule.length; i++) {
     schedule[i] = schedule[i]
-      .split(' ')
+      .split(" ")
       .filter(function(allItems, i, a) {
         return i == a.indexOf(allItems);
       })
-      .join(' ');
+      .join(" ");
   }
   return schedule;
 };
