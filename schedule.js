@@ -26,8 +26,8 @@ exports.isGroup = function(req_group) {
     "Т43"
   ];
   req_group = convert(req_group);
-  req_group = req_group.toLowerCase();
-  req_group = ucFirst(req_group).replace(/ /g, "");
+  req_group = req_group.toLowerCase().replace(/ /g, "");
+  req_group = ucFirst(req_group);
   let found = {};
   found.status = groups.includes(req_group);
   found.group = req_group;

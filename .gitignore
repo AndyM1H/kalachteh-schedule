@@ -1,6 +1,4 @@
 node_modules
-ngrok.exe
-package-lock.json
 .env
-schedule-old.js
+package-lock.json
 test.js
