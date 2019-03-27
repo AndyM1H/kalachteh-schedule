@@ -2,7 +2,7 @@
 const TOKEN = process.env.VK_API_KEY;
 const express = require("express");
 const bodyParser = require("body-parser");
-const { Botact } = require("botact");
+const {Botact} = require("botact");
 const schedule = require("./schedule");
 
 const bot = new Botact({
@@ -21,7 +21,7 @@ app.listen(port, () => {
 
 bot.addScene(
   "wizard",
-  ({ reply, scene: { next } }) => {
+  ({reply, scene: {next}}) => {
     next();
     reply("Привет, нажми начать!", null, {
       one_time: false,
@@ -41,12 +41,12 @@ bot.addScene(
       ]
     });
   },
-  ({ reply, body, scene: { leave } }) => {
+  ({reply, body, scene: {leave}}) => {
     leave();
   }
 );
 
-bot.command("join", ({ scene: { join } }) => join("wizard"));
+bot.command("join", ({scene: {join}}) => join("wizard"));
 
 bot.command("end", ctx => {
   ctx.reply("end", null, {
@@ -183,8 +183,13 @@ bot.command("Начать", ctx => {
 });
 
 bot.on(async ctx => {
-  let data = await schedule.getSchedule(ctx.text);
-  ctx.reply(data ? data.join("") : "На эту группу пока нет расписания :-(");
+  let data = schedule.isGroup(ctx.text);
+  if (data.status) {
+    data = await schedule.getSchedule(data.group);
+    ctx.reply(data ? data.join("") : "На эту группу пока нет расписания :-(");
+  }
+  // let data = await schedule.getSchedule(ctx.text);
+  // ctx.reply(data ? data.join("") : "На эту группу пока нет расписания :-(");
 });
 
 // Bot's endpoint

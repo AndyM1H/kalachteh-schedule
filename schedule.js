@@ -2,34 +2,81 @@ const needle = require("needle");
 const cheerio = require("cheerio"),
   cheerioTableparser = require("cheerio-tableparser");
 
-exports.getSchedule = async function(req_group) {
-  var correctDate = i => {
-    return i < 10 ? "0" + i : i;
-  };
-
-  function isGroup(group) {
-    function convert(group) {
-      return group.replace(/-/g, "").toUpperCase();
-    }
-    let groups = [
-      "Б12",
-      "Б22",
-      "Б32",
-      "Бух11",
-      "Бух21",
-      "Бух31",
-      "Т13",
-      "Т23",
-      "Т33",
-      "Т43"
-    ];
-    req_group = convert(req_group);
-    let found = groups.includes(req_group);
-    if (found) return true;
-    else return false;
+exports.isGroup = function(req_group) {
+  function convert(group) {
+    return group.replace(/-/g, "");
   }
-  if (!isGroup(req_group)) return null;
 
+  function ucFirst(str) {
+    // только пустая строка в логическом контексте даст false
+    if (!str) return str;
+    return str[0].toUpperCase() + str.slice(1);
+  }
+
+  let groups = [
+    "Б12",
+    "Б22",
+    "Б32",
+    "Бух11",
+    "Бух21",
+    "Бух31",
+    "Т13",
+    "Т23",
+    "Т33",
+    "Т43"
+  ];
+  req_group = convert(req_group);
+  req_group = req_group.toLowerCase();
+  req_group = ucFirst(req_group).replace(/ /g, "");
+  let found = {};
+  found.status = groups.includes(req_group);
+  found.group = req_group;
+  return found;
+};
+
+function toString(date) {
+  date = [
+    correctDate(date.getDate()),
+    correctDate(date.getMonth() + 1),
+    date.getFullYear()
+  ];
+  date = date.join(".").replace(/(^|\/)(\d)(?=\/)/g, "$10$2");
+  return date;
+}
+function toDate(date) {
+  date = date.split(".");
+  date = new Date(date[2], +date[1] - 1, +date[0]);
+  return date;
+}
+// string data
+function addDays(data, day) {
+  data = data.split(".");
+  data = new Date(data[2], +data[1] - 1, +data[0] + day, 0, 0, 0, 0);
+  data = [
+    correctDate(data.getDate()),
+    correctDate(data.getMonth() + 1),
+    data.getFullYear()
+  ];
+  data = data.join(".").replace(/(^|\/)(\d)(?=\/)/g, "$10$2");
+  return data;
+}
+
+function findIndexInArray(array, search) {
+  for (var i = 0; i < array[0].length; i++) {
+    let j = array[0][i].indexOf(search);
+
+    if (j >= 0) {
+      return i;
+    }
+  }
+  return 0;
+}
+
+var correctDate = i => {
+  return i < 10 ? "0" + i : i;
+};
+
+exports.getSchedule = async function(req_group) {
   const url = "http://kalachteh.ru/schedule/kioskschedule.html";
 
   let res_needle = await needle("get", url);
@@ -37,14 +84,21 @@ exports.getSchedule = async function(req_group) {
   cheerioTableparser($);
   let data = $("table").parsetable(true, true, true);
 
-  let dateOfSchedule = data[0][0].replace(
+  let date = new Date();
+  date = toString(date);
+  date = addDays(date, 1);
+
+  let index = findIndexInArray(data, date);
+  let dateOfSchedule = data[0][index].replace(
     new RegExp("Группа|[/\\\\/]|пара", "g"),
     ""
   );
-
   let group = {};
   let schedule = "";
-  for (let i = 1; i < 10 + 1; i++) {
+  if (index === undefined) {
+    index = 1;
+  }
+  for (let i = index; i < index + 11; i++) {
     group = data[0][i];
     if (group == req_group) {
       schedule = [
